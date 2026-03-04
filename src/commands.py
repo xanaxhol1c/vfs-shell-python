@@ -7,7 +7,7 @@ from typing import Any, Optional, Tuple, List
 
 from src.models import INode, Directory, File
 from src.context import VFSContext
-
+import os
 
 # help functions for path resolution
 
@@ -172,3 +172,18 @@ class CatCommand(ICommand):
             raise ValueError(f"cat: {self.path}: Є каталогом")
             
         return node.content
+
+class ClsCommand(ICommand):
+    """Cleans terminal window"""
+    def execute(self, context: VFSContext) -> bool:
+        # 'cls' for Windows, 'clear' for POSIX (Linux/Mac)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        return True
+
+class ExitCommand(ICommand):
+    """Program exit."""
+    def execute(self, context: VFSContext) -> None:
+        print("Завершення сесії VFS...")
+        # uses default system exit
+        import sys
+        sys.exit(0)

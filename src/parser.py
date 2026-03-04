@@ -7,7 +7,8 @@ import shlex
 from typing import List, Optional
 from src.commands import (
     ICommand, MkfsCommand, MkdirCommand, TouchCommand, 
-    CdCommand, ChmodCommand, LsCommand, CatCommand
+    CdCommand, ChmodCommand, LsCommand, CatCommand,
+    ClsCommand, ExitCommand
 )
 
 class InputParser:
@@ -51,6 +52,10 @@ class InputParser:
                 return LsCommand(path=path)
             elif command_name == "cat":
                 return CatCommand(path=args[0])
+            elif command_name == "cls" or command_name == "clear":
+                return ClsCommand()
+            elif command_name == "exit" or command_name == "quit":
+                return ExitCommand()
             else:
                 raise ValueError(f"Команда '{command_name}' не підтримується")
 

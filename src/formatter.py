@@ -6,6 +6,9 @@ from src.models import INode, File, Directory
 
 class OutputFormatter:
     def render_result(self, result: Any) -> None:
+        # If command returns true then don't print anything
+        if result is True:
+            return
         # If the command returns nothing (mkdir, touch, cd), print OK
         if result is None:
             print("  \033[92m[OK]\033[0m")
