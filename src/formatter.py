@@ -1,8 +1,11 @@
 """
 Formatting and outputting results.
 """
-from typing import Any, List
+
+from typing import List
 from src.models import INode, Directory
+from src.types import CommandResult
+
 
 class OutputFormatter:
     def render_comment(self, text: str) -> None:
@@ -13,7 +16,7 @@ class OutputFormatter:
         """Echoes command that is currently running."""
         print(f"\n> {text}")
 
-    def render_result(self, result: Any) -> None:
+    def render_result(self, result: CommandResult) -> None:
         # If command returns true then don't print anything
         if result is True:
             return
@@ -38,8 +41,8 @@ class OutputFormatter:
 
         # Drawing tables header
         print(f"  {'TYPE':<6} {'PERM':<6} {'SIZE':<10} {'NAME'}")
-        print(f"  {'-'*40}")
-        
+        print(f"  {'-' * 40}")
+
         for node in nodes:
             kind = "DIR" if isinstance(node, Directory) else "FILE"
             perm = oct(node.permissions)[2:]

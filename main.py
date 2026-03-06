@@ -3,33 +3,35 @@ from src.context import VFSContext
 from src.engine import ExecutionEngine
 from src.formatter import OutputFormatter
 
-def start_interactive_mode(engine: ExecutionEngine, context: VFSContext):
+
+def start_interactive_mode(engine: ExecutionEngine, context: VFSContext) -> None:
     """Запускає нескінченний цикл для введення команд користувачем."""
     print("🌟 VFS Interactive Shell (MVP)")
     print("Введіть 'exit' або 'quit' для виходу.\n")
 
     while True:
         try:
-            # Draw an invitation (prompt) showing the current path  
+            # Draw an invitation (prompt) showing the current path
             current_path = context.current_directory.get_path()
             user_input = input(f"\033[96mvfs:{current_path}$\033[0m ").strip()
 
             if not user_input:
                 continue
 
-            if user_input.lower() in ['exit', 'quit']:
+            if user_input.lower() in ["exit", "quit"]:
                 print("👋 До зустрічі!")
                 break
 
             engine.run(user_input)
 
-        except EOFError: # Processing Ctrl+D
+        except EOFError:  # Processing Ctrl+D
             break
-        except KeyboardInterrupt: # Processing Ctrl+C
+        except KeyboardInterrupt:  # Processing Ctrl+C
             print("\nВикористовуйте 'exit' для виходу.")
             continue
 
-def main():
+
+def main() -> None:
     parser = argparse.ArgumentParser(description="VFS Shell Simulator")
     parser.add_argument("script", nargs="?", help="Шлях до script.sh (опціонально)")
     args = parser.parse_args()
@@ -43,7 +45,7 @@ def main():
     if args.script:
         print(f"📂 Виконання скрипта: {args.script}")
         try:
-            with open(args.script, 'r', encoding='utf-8') as f:
+            with open(args.script, "r", encoding="utf-8") as f:
                 for line in f:
                     engine.run(line)
         except FileNotFoundError:
@@ -51,6 +53,7 @@ def main():
     else:
         # Otherwise, we go into live mode.
         start_interactive_mode(engine, context)
+
 
 if __name__ == "__main__":
     main()

@@ -12,9 +12,11 @@ class INode(ABC):
     Abstract base class for all file system elements.
     """
 
-    def __init__(self, name: str, parent: Optional['Directory'] = None, permissions: int = 0o777):
+    def __init__(
+        self, name: str, parent: Optional["Directory"] = None, permissions: int = 0o777
+    ) -> None:
         self.name: str = name
-        self.parent: Optional['Directory'] = parent
+        self.parent: Optional["Directory"] = parent
         self.permissions: int = permissions
 
     @abstractmethod
@@ -28,7 +30,7 @@ class INode(ABC):
         """
         if self.parent is None:
             return self.name if self.name == "/" else f"/{self.name}"
-        
+
         parent_path = self.parent.get_path()
         if parent_path == "/":
             return f"/{self.name}"
@@ -40,14 +42,20 @@ class File(INode):
     A class representing a text file in VFS.
     """
 
-    def __init__(self, name: str, content: str = "", parent: Optional['Directory'] = None, permissions: int = 0o644):
+    def __init__(
+        self,
+        name: str,
+        content: str = "",
+        parent: Optional["Directory"] = None,
+        permissions: int = 0o644,
+    ) -> None:
         # Files have default permissions of 644 (rw-r--r--)
         super().__init__(name, parent, permissions)
         self.content: str = content
 
     def get_size(self) -> int:
         """
-        Returns the file size. 
+        Returns the file size.
         For MVP, we consider 1 character = 1 byte.
         """
         return len(self.content)
@@ -55,11 +63,13 @@ class File(INode):
 
 class Directory(INode):
     """
-    A class representing a directory in VFS. 
+    A class representing a directory in VFS.
     Contains a dictionary of child elements for fast O(1) access.
     """
 
-    def __init__(self, name: str, parent: Optional['Directory'] = None, permissions: int = 0o755):
+    def __init__(
+        self, name: str, parent: Optional["Directory"] = None, permissions: int = 0o755
+    ) -> None:
         # Directories have default permissions of 755 (rwxr-xr-x)
         super().__init__(name, parent, permissions)
         self.children: Dict[str, INode] = {}

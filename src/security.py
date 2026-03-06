@@ -1,7 +1,9 @@
 """
 Security engine for checking file system permissions.
 """
-from src.models import INode, Directory, File
+
+from src.models import INode
+
 
 class SecurityEngine:
     # Constants for checks
@@ -20,15 +22,15 @@ class SecurityEngine:
         # Get permissions (e.g., 755 -> last digit 5 for ‘others’)
         # Simplified approach: take the last digit (rights for everyone)
         others_permissions = node.permissions % 10
-        
+
         # Checking with bitwise 'AND'
         return (others_permissions & required_access) == required_access
 
     def get_required_access(self, command_name: str) -> int:
         """Determines what level of access the team needs."""
-        read_commands = {'ls', 'cat', 'pwd'}
-        write_commands = {'mkdir', 'touch', 'rm', 'chmod'}
-        execute_commands = {'cd'}
+        read_commands = {"ls", "cat", "pwd"}
+        write_commands = {"mkdir", "touch", "rm", "chmod"}
+        execute_commands = {"cd"}
 
         if command_name in read_commands:
             return self.READ
