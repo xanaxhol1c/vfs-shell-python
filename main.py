@@ -5,9 +5,9 @@ from src.formatter import OutputFormatter
 
 
 def start_interactive_mode(engine: ExecutionEngine, context: VFSContext) -> None:
-    """Запускає нескінченний цикл для введення команд користувачем."""
-    print("🌟 VFS Interactive Shell (MVP)")
-    print("Введіть 'exit' або 'quit' для виходу.\n")
+    """Starts an infinite loop for user command input."""
+    print("VFS Interactive Shell (MVP)")
+    print("Type 'exit' or 'quit' to exit.\n")
 
     while True:
         try:
@@ -19,7 +19,7 @@ def start_interactive_mode(engine: ExecutionEngine, context: VFSContext) -> None
                 continue
 
             if user_input.lower() in ["exit", "quit"]:
-                print("👋 До зустрічі!")
+                print("Goodbye!")
                 break
 
             engine.run(user_input)
@@ -27,13 +27,13 @@ def start_interactive_mode(engine: ExecutionEngine, context: VFSContext) -> None
         except EOFError:  # Processing Ctrl+D
             break
         except KeyboardInterrupt:  # Processing Ctrl+C
-            print("\nВикористовуйте 'exit' для виходу.")
+            print("\nUse 'exit' to exit.")
             continue
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="VFS Shell Simulator")
-    parser.add_argument("script", nargs="?", help="Шлях до script.sh (опціонально)")
+    parser.add_argument("script", nargs="?", help="Path to script.sh (Optional)")
     args = parser.parse_args()
 
     # Creating the core of the system
@@ -43,13 +43,13 @@ def main() -> None:
 
     # If the path to the script is passed, execute it
     if args.script:
-        print(f"📂 Виконання скрипта: {args.script}")
+        print(f"Running script: {args.script}")
         try:
             with open(args.script, "r", encoding="utf-8") as f:
                 for line in f:
                     engine.run(line)
         except FileNotFoundError:
-            print(f"❌ Помилка: Файл {args.script} не знайдено.")
+            print(f"Error: File {args.script} not found.")
     else:
         # Otherwise, we go into live mode.
         start_interactive_mode(engine, context)

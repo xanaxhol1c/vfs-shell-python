@@ -18,6 +18,7 @@ class VFSContext:
 
         # Firstly current directory - its root
         self.current_directory: Directory = self.root
+        self.current_user = "admin"
 
     def is_initialized(self) -> bool:
         """Checks whether the mkfs command was invoked."""
