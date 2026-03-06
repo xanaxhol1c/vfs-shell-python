@@ -1,4 +1,3 @@
-import sys
 import argparse
 from src.context import VFSContext
 from src.engine import ExecutionEngine
@@ -11,7 +10,7 @@ def start_interactive_mode(engine: ExecutionEngine, context: VFSContext):
 
     while True:
         try:
-            # Малюємо запрошення (prompt), показуючи поточний шлях
+            # Draw an invitation (prompt) showing the current path  
             current_path = context.current_directory.get_path()
             user_input = input(f"\033[96mvfs:{current_path}$\033[0m ").strip()
 
@@ -24,9 +23,9 @@ def start_interactive_mode(engine: ExecutionEngine, context: VFSContext):
 
             engine.run(user_input)
 
-        except EOFError: # Обробка Ctrl+D
+        except EOFError: # Processing Ctrl+D
             break
-        except KeyboardInterrupt: # Обробка Ctrl+C
+        except KeyboardInterrupt: # Processing Ctrl+C
             print("\nВикористовуйте 'exit' для виходу.")
             continue
 
@@ -35,12 +34,12 @@ def main():
     parser.add_argument("script", nargs="?", help="Шлях до script.sh (опціонально)")
     args = parser.parse_args()
 
-    # Створюємо ядро системи
+    # Creating the core of the system
     context = VFSContext()
     formatter = OutputFormatter()
     engine = ExecutionEngine(context, formatter)
 
-    # Якщо передано шлях до скрипта — виконуємо його
+    # If the path to the script is passed, execute it
     if args.script:
         print(f"📂 Виконання скрипта: {args.script}")
         try:
@@ -50,7 +49,7 @@ def main():
         except FileNotFoundError:
             print(f"❌ Помилка: Файл {args.script} не знайдено.")
     else:
-        # Інакше — заходимо в лайв-режим
+        # Otherwise, we go into live mode.
         start_interactive_mode(engine, context)
 
 if __name__ == "__main__":

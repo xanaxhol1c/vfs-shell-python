@@ -80,7 +80,7 @@ class MkfsCommand(ICommand):
 
     def execute(self, context: VFSContext) -> str:
         context.max_size = self.max_size
-        return f"Файлову систему ініціалізовано. Розмір: {self.max_size} байт."
+        return f"The virtual file system has been initialized. Size: {self.max_size} bytes."
 
 
 class MkdirCommand(ICommand):
@@ -90,7 +90,7 @@ class MkdirCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
-            raise ValueError(f"mkdir: неможливо створити '{self.path}': Немає такого файлу або каталогу")
+            raise ValueError(f"mkdir: cannot create '{self.path}': No such file or directory")
         
         new_dir = Directory(name=name)
         parent.add_child(new_dir)
@@ -104,11 +104,11 @@ class TouchCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         # MVP quota check before write
         if context.is_initialized() and not context.has_enough_space(len(self.content)):
-            raise ValueError("touch: Немає вільного місця на пристрої (Quota Exceeded)")
+            raise ValueError("touch: No free space on device (Quota Exceeded)")
 
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
-            raise ValueError(f"touch: неможливо створити '{self.path}': Немає такого каталогу")
+            raise ValueError(f"touch: cannot create '{self.path}': No such directory")
         
         new_file = File(name=name, content=self.content)
         parent.add_child(new_file)
@@ -121,9 +121,9 @@ class CdCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         node = get_node_by_path(context, self.path)
         if not node:
-            raise ValueError(f"cd: {self.path}: Немає такого файлу або каталогу")
+            raise ValueError(f"cd: {self.path}: No such file or directory")
         if not isinstance(node, Directory):
-            raise ValueError(f"cd: {self.path}: Не є каталогом")
+            raise ValueError(f"cd: {self.path}: Not a directory")
             
         context.current_directory = node
 
@@ -136,7 +136,7 @@ class ChmodCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         node = get_node_by_path(context, self.path)
         if not node:
-            raise ValueError(f"chmod: неможливо отримати доступ до '{self.path}': Немає такого файлу або каталогу")
+            raise ValueError(f"chmod: cannot access '{self.path}': No such file or directory")
         
         node.permissions = self.permissions
 
@@ -150,7 +150,7 @@ class LsCommand(ICommand):
         node = get_node_by_path(context, target_path)
         
         if not node:
-            raise ValueError(f"ls: неможливо отримати доступ до '{self.path}': Немає такого файлу або каталогу")
+            raise ValueError(f"ls: cannot acces '{self.path}': No such file or directory")
             
         if isinstance(node, File):
             return [node]
@@ -167,9 +167,9 @@ class CatCommand(ICommand):
         node = get_node_by_path(context, self.path)
         
         if not node:
-            raise ValueError(f"cat: {self.path}: Немає такого файлу або каталогу")
+            raise ValueError(f"cat: {self.path}: No such file or directory")
         if isinstance(node, Directory):
-            raise ValueError(f"cat: {self.path}: Є каталогом")
+            raise ValueError(f"cat: {self.path}: Is a directory")
             
         return node.content
 
@@ -183,7 +183,7 @@ class ClsCommand(ICommand):
 class ExitCommand(ICommand):
     """Program exit."""
     def execute(self, context: VFSContext) -> None:
-        print("Завершення сесії VFS...")
+        print("End of the VFS session...")
         # uses default system exit
         import sys
         sys.exit(0)

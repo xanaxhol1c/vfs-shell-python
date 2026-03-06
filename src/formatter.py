@@ -2,9 +2,17 @@
 Formatting and outputting results.
 """
 from typing import Any, List
-from src.models import INode, File, Directory
+from src.models import INode, Directory
 
 class OutputFormatter:
+    def render_comment(self, text: str) -> None:
+        """Prints comments with grey color."""
+        print(f"\n\033[90m{text}\033[0m")
+
+    def render_command_echo(self, text: str) -> None:
+        """Echoes command that is currently running."""
+        print(f"\n> {text}")
+
     def render_result(self, result: Any) -> None:
         # If command returns true then don't print anything
         if result is True:

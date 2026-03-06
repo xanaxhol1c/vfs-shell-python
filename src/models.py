@@ -41,7 +41,7 @@ class File(INode):
     """
 
     def __init__(self, name: str, content: str = "", parent: Optional['Directory'] = None, permissions: int = 0o644):
-        # Файли за замовчуванням мають права 644 (rw-r--r--)
+        # Files have default permissions of 644 (rw-r--r--)
         super().__init__(name, parent, permissions)
         self.content: str = content
 
@@ -73,14 +73,14 @@ class Directory(INode):
     def add_child(self, node: INode) -> None:
         """Adds new node to directory."""
         if node.name in self.children:
-            raise ValueError(f"Елемент з іменем '{node.name}' вже існує.")
+            raise ValueError(f"Element with name '{node.name}' already exists.")
         node.parent = self
         self.children[node.name] = node
 
     def remove_child(self, name: str) -> None:
         """Removes node from directory based on name."""
         if name not in self.children:
-            raise KeyError(f"Елемент '{name}' не знайдено.")
+            raise KeyError(f"Element '{name}' not found")
         del self.children[name]
 
     def get_child(self, name: str) -> Optional[INode]:

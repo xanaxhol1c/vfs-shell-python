@@ -4,7 +4,7 @@ Supports basic input or script.sh format.
 """
 
 import shlex
-from typing import List, Optional
+from typing import Optional
 from src.commands import (
     ICommand, MkfsCommand, MkdirCommand, TouchCommand, 
     CdCommand, ChmodCommand, LsCommand, CatCommand,
@@ -57,7 +57,7 @@ class InputParser:
             elif command_name == "exit" or command_name == "quit":
                 return ExitCommand()
             else:
-                raise ValueError(f"Команда '{command_name}' не підтримується")
+                raise ValueError(f"Command '{command_name}' is not supported")
 
         except IndexError:
-            raise ValueError(f"Команді '{command_name}' бракує аргументів")
+            raise ValueError(f"Command '{command_name}' lacks arguments")

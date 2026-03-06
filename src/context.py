@@ -2,7 +2,6 @@
 The module contains the execution context of the virtual file system.
 """
 
-from typing import Optional
 from src.models import Directory
 
 
