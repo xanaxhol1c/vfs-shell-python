@@ -6,12 +6,13 @@ from src.formatter import OutputFormatter
 from src.parser import InputParser
 from src.exceptions import VFSBaseException
 
+
 def process_line(
     raw_line: str,
     engine: ExecutionEngine,
     parser: InputParser,
     formatter: OutputFormatter,
-    line_num: int
+    line_num: int,
 ) -> None:
     """
     Combines parsing and execution. Acts as the glue between input and logic.
@@ -41,7 +42,7 @@ def process_line(
         error_type = e.__class__.__name__
         formatted_error = f"[{error_type}] - {str(e)} at line {line_num}."
         formatter.render_error(formatted_error)
-        
+
     except Exception as e:
         # Fallback for completely unexpected system errors to prevent crash
         error_type = e.__class__.__name__
@@ -50,10 +51,7 @@ def process_line(
 
 
 def start_interactive_mode(
-    engine: ExecutionEngine,
-    parser: InputParser,
-    formatter: OutputFormatter,
-    context: VFSContext
+    engine: ExecutionEngine, parser: InputParser, formatter: OutputFormatter, context: VFSContext
 ) -> None:
     """Starts an infinite loop for user command input."""
     print("\033[94mVFS Interactive Shell (MVP)\033[0m")
@@ -102,7 +100,9 @@ def main() -> None:
                     process_line(line, engine, input_parser, formatter, line_num)
                     line_num += 1
         except FileNotFoundError:
-            formatter.render_error(f"[FileSystemException] - File {args.script} not found at line 0.")
+            formatter.render_error(
+                f"[FileSystemException] - File {args.script} not found at line 0."
+            )
     else:
         # Otherwise, we go into live mode.
         start_interactive_mode(engine, input_parser, formatter, context)

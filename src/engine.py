@@ -33,9 +33,7 @@ class ExecutionEngine:
 
         # Perform a POSIX-style security check
         if not self.security.has_access(
-            self.context.current_directory, 
-            self.context.current_user, 
-            required_access
+            self.context.current_directory, self.context.current_user, required_access
         ):
             raise VFSSecurityException(
                 f"Access denied: user '{self.context.current_user}' "

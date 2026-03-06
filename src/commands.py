@@ -15,6 +15,7 @@ from src.exceptions import VFSFileSystemException, VFSValidationException
 
 # Help functions for path resolution
 
+
 def get_node_by_path(context: VFSContext, path: str) -> Optional[INode]:
     """
     Travels through VFS tree based on path line.
@@ -86,7 +87,7 @@ class MkfsCommand(ICommand):
     def execute(self, context: VFSContext) -> str:
         if self.max_size <= 0:
             raise VFSValidationException("mkfs: disk size must be greater than 0")
-        
+
         context.max_size = self.max_size
         return f"The virtual file system has been initialized. Size: {self.max_size} bytes."
 
@@ -98,7 +99,9 @@ class MkdirCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
-            raise VFSFileSystemException(f"mkdir: cannot create '{self.path}': No such file or directory")
+            raise VFSFileSystemException(
+                f"mkdir: cannot create '{self.path}': No such file or directory"
+            )
 
         new_dir = Directory(name=name)
         parent.add_child(new_dir)
@@ -120,7 +123,6 @@ class TouchCommand(ICommand):
 
         new_file = File(name=name, content=self.content)
         parent.add_child(new_file)
-
 
 
 class CdCommand(ICommand):
@@ -145,7 +147,9 @@ class ChmodCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         node = get_node_by_path(context, self.path)
         if not node:
-            raise VFSFileSystemException(f"chmod: cannot access '{self.path}': No such file or directory")
+            raise VFSFileSystemException(
+                f"chmod: cannot access '{self.path}': No such file or directory"
+            )
 
         node.permissions = self.permissions
 
@@ -159,7 +163,9 @@ class LsCommand(ICommand):
         node = get_node_by_path(context, target_path)
 
         if not node:
-            raise VFSFileSystemException(f"ls: cannot access '{self.path}': No such file or directory")
+            raise VFSFileSystemException(
+                f"ls: cannot access '{self.path}': No such file or directory"
+            )
 
         if isinstance(node, File):
             return [node]
