@@ -1,22 +1,19 @@
 """
 The module contains the ICommand interface and implementations of specific commands (MVP).
-Implements the Command pattern.
+Implements the Command pattern with Defensive Programming principles.
 """
 
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple, List
+import os
+import sys
 
 from src.models import INode, Directory, File
 from src.context import VFSContext
 from src.types import CommandResult
+from src.exceptions import VFSFileSystemException, VFSValidationException
 
-import os
-
-# only for exit command
-import sys
-
-# help functions for path resolution
-
+# Help functions for path resolution
 
 def get_node_by_path(context: VFSContext, path: str) -> Optional[INode]:
     """
@@ -35,7 +32,7 @@ def get_node_by_path(context: VFSContext, path: str) -> Optional[INode]:
             continue  # Current dir, continue
 
         if part == "..":
-            # Going up if its not root
+            # Going up if it's not root
             if current.parent is not None:
                 current = current.parent
             continue
@@ -43,10 +40,10 @@ def get_node_by_path(context: VFSContext, path: str) -> Optional[INode]:
         if isinstance(current, Directory):
             child = current.get_child(part)
             if not child:
-                return None  # Path crashed
+                return None  # Path crashed (node not found)
             current = child
         else:
-            return None  # Trying to get inside file
+            return None  # Trying to get inside a file
 
     return current
 
@@ -75,8 +72,9 @@ class ICommand(ABC):
     @abstractmethod
     def execute(self, context: VFSContext) -> CommandResult:
         """
-        Does action in given context.
+        Executes action in the given context.
         Returns data to print or None.
+        Raises VFSBaseException derivatives on failure.
         """
         pass
 
@@ -86,6 +84,9 @@ class MkfsCommand(ICommand):
         self.max_size = max_size
 
     def execute(self, context: VFSContext) -> str:
+        if self.max_size <= 0:
+            raise VFSValidationException("mkfs: disk size must be greater than 0")
+        
         context.max_size = self.max_size
         return f"The virtual file system has been initialized. Size: {self.max_size} bytes."
 
@@ -97,7 +98,7 @@ class MkdirCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
-            raise ValueError(f"mkdir: cannot create '{self.path}': No such file or directory")
+            raise VFSFileSystemException(f"mkdir: cannot create '{self.path}': No such file or directory")
 
         new_dir = Directory(name=name)
         parent.add_child(new_dir)
@@ -111,14 +112,15 @@ class TouchCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         # MVP quota check before write
         if context.is_initialized() and not context.has_enough_space(len(self.content)):
-            raise ValueError("touch: No free space on device (Quota Exceeded)")
+            raise VFSFileSystemException("touch: No free space on device (Quota Exceeded)")
 
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
-            raise ValueError(f"touch: cannot create '{self.path}': No such directory")
+            raise VFSFileSystemException(f"touch: cannot create '{self.path}': No such directory")
 
         new_file = File(name=name, content=self.content)
         parent.add_child(new_file)
+
 
 
 class CdCommand(ICommand):
@@ -128,9 +130,9 @@ class CdCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         node = get_node_by_path(context, self.path)
         if not node:
-            raise ValueError(f"cd: {self.path}: No such file or directory")
+            raise VFSFileSystemException(f"cd: {self.path}: No such file or directory")
         if not isinstance(node, Directory):
-            raise ValueError(f"cd: {self.path}: Not a directory")
+            raise VFSFileSystemException(f"cd: {self.path}: Not a directory")
 
         context.current_directory = node
 
@@ -143,7 +145,7 @@ class ChmodCommand(ICommand):
     def execute(self, context: VFSContext) -> None:
         node = get_node_by_path(context, self.path)
         if not node:
-            raise ValueError(f"chmod: cannot access '{self.path}': No such file or directory")
+            raise VFSFileSystemException(f"chmod: cannot access '{self.path}': No such file or directory")
 
         node.permissions = self.permissions
 
@@ -157,7 +159,7 @@ class LsCommand(ICommand):
         node = get_node_by_path(context, target_path)
 
         if not node:
-            raise ValueError(f"ls: cannot acces '{self.path}': No such file or directory")
+            raise VFSFileSystemException(f"ls: cannot access '{self.path}': No such file or directory")
 
         if isinstance(node, File):
             return [node]
@@ -174,9 +176,9 @@ class CatCommand(ICommand):
         node = get_node_by_path(context, self.path)
 
         if not node:
-            raise ValueError(f"cat: {self.path}: No such file or directory")
+            raise VFSFileSystemException(f"cat: {self.path}: No such file or directory")
         if isinstance(node, Directory):
-            raise ValueError(f"cat: {self.path}: Is a directory")
+            raise VFSFileSystemException(f"cat: {self.path}: Is a directory")
 
         return node.content
 

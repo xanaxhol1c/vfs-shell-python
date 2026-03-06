@@ -32,6 +32,11 @@ class OutputFormatter:
             print(f"  \033[94m{result}\033[0m")
 
     def render_error(self, message: str) -> None:
+        """
+        Prints error messages in red with a consistent prefix.
+        Input: "[VFSSyntaxException] - Message at line X."
+        Output: "  [ERROR] [VFSSyntaxException] - Message at line X."
+        """
         print(f"  \033[91m[ERROR] {message}\033[0m")
 
     def _render_ls(self, nodes: List[INode]) -> None:
