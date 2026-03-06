@@ -5,7 +5,7 @@ It implements the Composite pattern for unified work with files and directories.
 
 from abc import ABC, abstractmethod
 from typing import Dict, Optional
-
+from src.exceptions import VFSFileSystemException, VFSValidationException
 
 class INode(ABC):
     """
@@ -80,12 +80,24 @@ class Directory(INode):
         """
         return sum(child.get_size() for child in self.children.values())
 
-    def add_child(self, node: INode) -> None:
-        """Adds new node to directory."""
+    def add_child(self, node: INode) -> None:   
+        """Adds new node to directory with name and character validation."""
+        # check for invalid characters
+        forbidden_chars = ["?", "*", "\\"]
+        if any(char in node.name for char in forbidden_chars):
+            raise VFSValidationException(
+                f"Invalid characters in name '{node.name}'. "
+                f"Symbols ?, *, \\ are forbidden."
+            )
+
+        # check for name conflicts
         if node.name in self.children:
-            raise ValueError(f"Element with name '{node.name}' already exists.")
-        node.parent = self
+            raise VFSFileSystemException(
+                f"Element with name '{node.name}' already exists in this directory."
+            )
+        
         self.children[node.name] = node
+        node.parent = self
 
     def remove_child(self, name: str) -> None:
         """Removes node from directory based on name."""
