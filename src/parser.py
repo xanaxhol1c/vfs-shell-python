@@ -1,6 +1,7 @@
 """
 The module contains class for parsing input with commands given from user.
 Supports basic input or script.sh format.
+Implements specific exception handling for parsing errors.
 """
 
 import shlex
@@ -17,27 +18,32 @@ from src.commands import (
     ClsCommand,
     ExitCommand,
 )
+from src.exceptions import VFSSyntaxException, VFSValidationException
 
 
 class InputParser:
     """
-    Класс для перетворення вхідних рядків у об'єкти команд.
+    Class responsible for converting input strings into executable command objects.
     """
 
     @staticmethod
     def parse(raw_input: str) -> Optional[ICommand]:
         """
-        Converts a string to a command object.
+        Converts a string to a command object using a dispatch table.
         Returns None if the string is empty or is a comment.
+        Raises VFSSyntaxException or VFSValidationException on parsing errors.
         """
         line = raw_input.strip()
 
-        # check for comment or empty line
+        # Ignore empty lines or comments
         if not line or line.startswith("#"):
             return None
 
-        # Split line on tokens
-        tokens = shlex.split(line)
+        try:
+            # Use shlex to handle tokens and quoted arguments properly
+            tokens = shlex.split(line)
+        except ValueError as e:
+            raise VFSSyntaxException(f"Shell parsing error: {str(e)}") from e
 
         if not tokens:
             return None
@@ -45,8 +51,7 @@ class InputParser:
         command_name = tokens[0].lower()
         args = tokens[1:]
 
-        # Define factories for each command
-        # Each lambda takes a list of arguments and returns a command object
+        # Dispatch table mapping command strings to their respective factories
         factories: Dict[str, Callable[[list[str]], ICommand]] = {
             "mkfs": lambda a: MkfsCommand(max_size=int(a[0])),
             "mkdir": lambda a: MkdirCommand(path=a[0]),
@@ -61,12 +66,14 @@ class InputParser:
             "quit": lambda _: ExitCommand(),
         }
 
-        try:
-            if command_name not in factories:
-                raise ValueError(f"Command '{command_name}' is not supported")
+        if command_name not in factories:
+            raise VFSSyntaxException(f"Command '{command_name}' is not supported")
 
+        try:
+            # Execute the factory lambda with the provided arguments
             return factories[command_name](args)
 
         except (IndexError, ValueError) as e:
-            # If an error occurs in lambda (for example, int(a[0]) with an empty list)
-            raise ValueError(f"Invalid arguments for {command_name}: {e}") from e
+            # Handle cases where arguments are missing or have incorrect types
+            error_msg = f"Invalid arguments for '{command_name}': {str(e)}"
+            raise VFSValidationException(error_msg) from e

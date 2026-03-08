@@ -19,7 +19,10 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "ruff (>=0.15.2,<0.16.0)"
+    "ruff (>=0.15.2,<0.16.0)",
+    "pytest (>=9.0.2,<10.0.0)",
+    "coverage (>=7.13.4,<8.0.0)",
+    "pytest-mock (>=3.15.1,<4.0.0)"
 ]
 
 [tool.ruff]
@@ -42,4 +45,4 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "PL", "B", "N", "ANN"]
 
-ignore = []
+ignore = ["N818"]
