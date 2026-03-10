@@ -34,7 +34,8 @@ exclude = [
     ".ruff_cache",
     ".env",
     ".env.*",
-    "docs"
+    "docs",
+    "tests",
 ]
 
 line-length = 100
