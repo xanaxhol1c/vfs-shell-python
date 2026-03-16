@@ -97,6 +97,9 @@ class MkdirCommand(ICommand):
         self.path = path
 
     def execute(self, context: VFSContext) -> None:
+        if not context.is_initialized():
+            raise VFSFileSystemException("mkdir: Filespace was not initialized.")
+
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
             raise VFSFileSystemException(
@@ -114,9 +117,10 @@ class TouchCommand(ICommand):
 
     def execute(self, context: VFSContext) -> None:
         # MVP quota check before write
-        if context.is_initialized() and not context.has_enough_space(len(self.content)):
+        if not context.is_initialized():
+            raise VFSFileSystemException("touch: Filespace was not initialized.")
+        if not context.has_enough_space(len(self.content)):
             raise VFSFileSystemException("touch: No free space on device (Quota Exceeded)")
-
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
             raise VFSFileSystemException(f"touch: cannot create '{self.path}': No such directory")

@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 from src.exceptions import VFSFileSystemException, VFSValidationException
 
+
 class INode(ABC):
     """
     Abstract base class for all file system elements.
@@ -80,14 +81,13 @@ class Directory(INode):
         """
         return sum(child.get_size() for child in self.children.values())
 
-    def add_child(self, node: INode) -> None:   
+    def add_child(self, node: INode) -> None:
         """Adds new node to directory with name and character validation."""
         # check for invalid characters
         forbidden_chars = ["?", "*", "\\"]
         if any(char in node.name for char in forbidden_chars):
             raise VFSValidationException(
-                f"Invalid characters in name '{node.name}'. "
-                f"Symbols ?, *, \\ are forbidden."
+                f"Invalid characters in name '{node.name}'. Symbols ?, *, \\ are forbidden."
             )
 
         # check for name conflicts
@@ -95,7 +95,7 @@ class Directory(INode):
             raise VFSFileSystemException(
                 f"Element with name '{node.name}' already exists in this directory."
             )
-        
+
         self.children[node.name] = node
         node.parent = self
 
