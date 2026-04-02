@@ -109,27 +109,26 @@ vfs:/$ ls /
 
 Execute VFS Shell commands stored in a script file:
 
-```bash
+
 # Create a script file on your host machine
+```bash
 mkfs 2048
 mkdir /home
 mkdir /home/user
 touch /home/user/data.txt "Hello VFS"
 ls -la /home/user
 cat /home/user/data.txt
-
+```
 
 # Run the script in the container via volume mount
-```
+```bash
 docker run -v "$(pwd)/commands.sh:/app/commands.sh" vfs-shell:latest /app/commands.sh
 ```
-
 or
- 
-```
-docker run -v "$(pwd)/script_test.sh:/app/script_test.sh" vfs-shell:latest /app/script_test.sh
-```
 
+```bash
+docker run -v "$(pwd)/script_test.sh:/app/script_test.sh" vfs-shell:latest /app/script_test.s
+```
 #### Using Configuration Files
 
 Pass custom configuration for encryption/compression rules:
