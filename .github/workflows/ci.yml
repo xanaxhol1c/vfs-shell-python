@@ -51,7 +51,7 @@ jobs:
       # Step 7: Install dependencies
       - name: Install dependencies
         run: |
-          $HOME/.local/bin/poetry install
+          $HOME/.local/bin/poetry install --no-root
 
       # Step 8: Run Ruff linter
       - name: Lint with Ruff
