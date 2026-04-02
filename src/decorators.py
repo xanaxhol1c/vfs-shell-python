@@ -1,8 +1,9 @@
 import base64
 from src.models import IVirtualFile
 
+
 class FileDecorator(IVirtualFile):
-    def __init__(self, wrapped: IVirtualFile):
+    def __init__(self, wrapped: IVirtualFile) -> None:
         super().__init__(wrapped.name, wrapped.parent, wrapped.permissions)
         self._wrapped = wrapped
 
@@ -15,6 +16,7 @@ class FileDecorator(IVirtualFile):
     def get_size(self) -> int:
         return self._wrapped.get_size()
 
+
 class EncryptedFileDecorator(FileDecorator):
     def read(self) -> str:
         encrypted_data = super().read()
@@ -25,6 +27,7 @@ class EncryptedFileDecorator(FileDecorator):
     def write(self, data: str) -> None:
         encrypted = base64.b64encode(data.encode()).decode()
         super().write(encrypted)
+
 
 class CompressedFileDecorator(FileDecorator):
     def write(self, data: str) -> None:

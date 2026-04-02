@@ -8,7 +8,7 @@ from typing import Optional, Tuple, List
 import os
 import sys
 
-from src.models import INode, Directory, File, IVirtualFile
+from src.models import INode, Directory, File
 from src.context import VFSContext
 from src.types import CommandResult
 from src.exceptions import VFSFileSystemException, VFSValidationException
@@ -133,7 +133,7 @@ class TouchCommand(ICommand):
                 name=name,
                 parent_path=parent.get_path(),
                 config_manager=context.config_manager,
-                content=self.content
+                content=self.content,
             )
         else:
             # Fallback to plain File if no config
@@ -205,7 +205,7 @@ class CatCommand(ICommand):
 
         # Use .read() method to support decorated files (encrypted/compressed)
         # This enables transparent decryption/decompression
-        if hasattr(node, 'read'):
+        if hasattr(node, "read"):
             return node.read()
         return node.content
 
@@ -246,17 +246,17 @@ class RevealCommand(ICommand):
         # Access the underlying wrapped file to see raw content
         # For decorated files, this shows encrypted/compressed data
         # For plain files, this shows normal content
-        if hasattr(node, '_wrapped'):
+        if hasattr(node, "_wrapped"):
             # This is a decorator - get the innermost wrapped file
             current = node
-            while hasattr(current, '_wrapped'):
+            while hasattr(current, "_wrapped"):
                 current = current._wrapped
             # Now current should be the plain File object
-            if hasattr(current, 'content'):
+            if hasattr(current, "content"):
                 return f"[INTERNAL STORAGE]\n{current.content}"
 
         # Plain file or no wrapping
-        if hasattr(node, 'content'):
+        if hasattr(node, "content"):
             return f"[PLAINTEXT]\n{node.content}"
 
         return "[ERROR] Cannot access file content"

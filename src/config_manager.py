@@ -1,17 +1,18 @@
 import json
 import os
 
+
 class ConfigManager:
-    def __init__(self, config_path: str = "vfs_config.json"):
+    def __init__(self, config_path: str = "vfs_config.json") -> None:
         self.rules = []
         self._load_config(config_path)
 
-    def _load_config(self, path: str):
+    def _load_config(self, path: str) -> None:
         if not os.path.exists(path):
             return
-        
+
         try:
-            with open(path, 'r') as f:
+            with open(path, "r") as f:
                 data = json.load(f)
                 self.rules = data.get("rules", [])
         except (json.JSONDecodeError, IOError):

@@ -37,6 +37,7 @@ class INode(ABC):
             return f"/{self.name}"
         return f"{parent_path}/{self.name}"
 
+
 class IVirtualFile(INode, ABC):
     @abstractmethod
     def read(self) -> str:
@@ -45,7 +46,6 @@ class IVirtualFile(INode, ABC):
     @abstractmethod
     def write(self, data: str) -> None:
         pass
-
 
 
 class File(IVirtualFile):

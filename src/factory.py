@@ -1,9 +1,15 @@
+from typing import Optional
+
+from src.config_manager import ConfigManager
 from src.models import File, IVirtualFile
 from src.decorators import EncryptedFileDecorator, CompressedFileDecorator
 
+
 class FileFactory:
     @staticmethod
-    def create_file(name: str, parent_path: str, config_manager, content: str = "") -> IVirtualFile:
+    def create_file(
+        name: str, parent_path: str, config_manager: Optional[ConfigManager], content: str = ""
+    ) -> IVirtualFile:
         file_obj = File(name=name, content="")
 
         # Only apply decorators if config_manager is provided

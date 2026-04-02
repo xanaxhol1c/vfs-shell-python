@@ -87,7 +87,8 @@ def main() -> None:
         "--config",
         type=str,
         default="vfs_config.json",
-        help="Path to configuration file for encryption/compression rules (default: vfs_config.json)"
+        help="Path to configuration file for encryption/compression"
+        " rules (default: vfs_config.json)",
     )
     args = arg_parser.parse_args()
 
