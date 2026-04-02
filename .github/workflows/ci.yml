@@ -22,7 +22,7 @@ jobs:
 
       # Step 3: Cache Poetry dependencies
       - name: Cache Poetry installation
-        uses: actions/cache@4
+        uses: actions/cache@v4
         with:
           path: ~/.local
           key: poetry-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
@@ -41,7 +41,7 @@ jobs:
 
       # Step 6: Cache virtual environment
       - name: Cache venv
-        uses: actions/cache@4
+        uses: actions/cache@v4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
