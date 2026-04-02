@@ -13,6 +13,10 @@ dependencies = [
     "pytest-cov (>=7.1.0,<8.0.0)"
 ]
 
+packages = [
+    { include = "src" }
+]
+include = ["main.py", "vfs_config.json", "script.sh", "script_test.sh"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
