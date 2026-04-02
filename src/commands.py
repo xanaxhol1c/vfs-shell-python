@@ -8,10 +8,11 @@ from typing import Optional, Tuple, List
 import os
 import sys
 
-from src.models import INode, Directory, File
+from src.models import INode, Directory, File, IVirtualFile
 from src.context import VFSContext
 from src.types import CommandResult
 from src.exceptions import VFSFileSystemException, VFSValidationException
+from src.factory import FileFactory
 
 # Help functions for path resolution
 
@@ -125,7 +126,19 @@ class TouchCommand(ICommand):
         if not parent:
             raise VFSFileSystemException(f"touch: cannot create '{self.path}': No such directory")
 
-        new_file = File(name=name, content=self.content)
+        # Use FileFactory to create file with decorators (encrypted/compressed)
+        # based on configuration (if config_manager is available)
+        if context.config_manager:
+            new_file = FileFactory.create_file(
+                name=name,
+                parent_path=parent.get_path(),
+                config_manager=context.config_manager,
+                content=self.content
+            )
+        else:
+            # Fallback to plain File if no config
+            new_file = File(name=name, content=self.content)
+
         parent.add_child(new_file)
 
 
@@ -190,6 +203,10 @@ class CatCommand(ICommand):
         if isinstance(node, Directory):
             raise VFSFileSystemException(f"cat: {self.path}: Is a directory")
 
+        # Use .read() method to support decorated files (encrypted/compressed)
+        # This enables transparent decryption/decompression
+        if hasattr(node, 'read'):
+            return node.read()
         return node.content
 
 

@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "path": "/secret",
+      "decorators": ["encrypted"]
+    },
+    {
+      "path": "/archive",
+      "decorators": ["compressed"]
+    },
+    {
+      "path": "/secure",
+      "decorators": ["encrypted", "compressed"]
+    }
+  ]
+}

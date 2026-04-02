@@ -2,7 +2,9 @@
 The module contains the execution context of the virtual file system.
 """
 
+from typing import Optional
 from src.models import Directory
+from src.config_manager import ConfigManager
 
 
 class VFSContext:
@@ -10,8 +12,9 @@ class VFSContext:
     Stores the global state of the file system: root, current directory, and quotas.
     """
 
-    def __init__(self, max_size: int = 0) -> None:
+    def __init__(self, max_size: int = 0, config_manager: Optional[ConfigManager] = None) -> None:
         self.max_size: int = max_size
+        self.config_manager: Optional[ConfigManager] = config_manager
 
         # Creating root directory
         self.root: Directory = Directory(name="/", parent=None)

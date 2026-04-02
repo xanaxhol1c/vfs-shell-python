@@ -4,6 +4,7 @@ from src.context import VFSContext
 from src.engine import ExecutionEngine
 from src.formatter import OutputFormatter
 from src.parser import InputParser
+from src.config_manager import ConfigManager
 from src.exceptions import VFSBaseException
 
 
@@ -82,10 +83,19 @@ def start_interactive_mode(
 def main() -> None:
     arg_parser = argparse.ArgumentParser(description="VFS Shell Simulator")
     arg_parser.add_argument("script", nargs="?", help="Path to script.sh (Optional)")
+    arg_parser.add_argument(
+        "--config",
+        type=str,
+        default="vfs_config.json",
+        help="Path to configuration file for encryption/compression rules (default: vfs_config.json)"
+    )
     args = arg_parser.parse_args()
 
+    # Initialize ConfigManager (loads config if exists)
+    config_manager = ConfigManager(args.config)
+
     # Creating the core of the system
-    context = VFSContext()
+    context = VFSContext(config_manager=config_manager)
     formatter = OutputFormatter()
     engine = ExecutionEngine(context, formatter)
     input_parser = InputParser()
