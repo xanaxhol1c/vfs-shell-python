@@ -1,0 +1,165 @@
+name: Release & Publish
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers only on version tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  # Job 1: Build and publish Python wheel package
+  build-package:
+    runs-on: ubuntu-latest
+    name: Build Python Package
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Build distributions
+        run: |
+          $HOME/.local/bin/poetry build --project=src
+
+      - name: List artifacts
+        run: |
+          ls -lh dist/
+
+      - name: Upload artifacts to job
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/
+          retention-days: 5
+
+  # Job 2: Build and push Docker image to GitHub Container Registry
+  build-docker:
+    runs-on: ubuntu-latest
+    name: Build & Push Docker Image
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "image_tag=ghcr.io/${{ github.repository_owner }}/vfs-shell:${VERSION}" >> $GITHUB_OUTPUT
+          echo "image_latest=ghcr.io/${{ github.repository_owner }}/vfs-shell:latest" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.version.outputs.image_tag }}
+            ${{ steps.version.outputs.image_latest }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Job 3: Create GitHub Release with artifacts
+  create-release:
+    runs-on: ubuntu-latest
+    name: Create GitHub Release
+    needs: [build-package, build-docker]
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Python distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create Release Notes
+        id: notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## VFS Shell ${{ steps.version.outputs.version }}
+
+          ### 📦 Artifacts
+
+          **Python Package:**
+          - Install via pip: `pip install dist/vfs_shell-${{ steps.version.outputs.version }}-py3-none-any.whl`
+          - Or from source: `pip install dist/vfs-shell-${{ steps.version.outputs.version }}.tar.gz`
+
+          **Docker Image:**
+          - Pull from GitHub Container Registry:
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/vfs-shell:${{ steps.version.outputs.version }}
+            ```
+          - Or use the latest tag:
+            ```bash
+            docker pull ghcr.io/${{ github.repository_owner }}/vfs-shell:latest
+            ```
+
+          ### 🚀 Quick Start
+
+          **With Docker:**
+          ```bash
+          docker run -it ghcr.io/${{ github.repository_owner }}/vfs-shell:${{ steps.version.outputs.version }}
+          ```
+
+          **With Python Wheel:**
+          ```bash
+          pip install dist/vfs_shell-${{ steps.version.outputs.version }}-py3-none-any.whl
+          python -m vfs_shell
+          ```
+
+          ### 📋 Release Information
+          - **Tag:** `${{ steps.version.outputs.version }}`
+          - **Commit:** ${{ github.sha }}
+          - **Branch:** ${{ github.ref }}
+
+          For detailed changes, see the commit history.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release Summary
+        run: |
+          echo "✅ Release ${{ steps.version.outputs.version }} created successfully!"
+          echo "📦 Python wheel: dist/vfs_shell-${{ steps.version.outputs.version }}-py3-none-any.whl"
+          echo "📦 Source dist: dist/vfs-shell-${{ steps.version.outputs.version }}.tar.gz"
+          echo "🐳 Docker image: ghcr.io/${{ github.repository_owner }}/vfs-shell:${{ steps.version.outputs.version }}"

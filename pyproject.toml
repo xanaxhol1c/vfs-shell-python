@@ -1,6 +1,6 @@
 [project]
 name = "vfs-shell"
-version = "0.1.0"
+version = "2.0.0"
 description = ""
 authors = [
     {name = "romanplakhota",email = "loram.hoptan@gmail.com"}
@@ -9,9 +9,15 @@ license = {text = "MIT"}
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "rich (>=14.3.3,<15.0.0)"
+    "rich (>=14.3.3,<15.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)"
 ]
 
+[tool.poetry]
+packages = [
+    { include = "src" }
+]
+include = ["main.py", "vfs_config.json", "script.sh", "script_test.sh"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -34,7 +40,9 @@ exclude = [
     ".ruff_cache",
     ".env",
     ".env.*",
-    "docs"
+    "docs",
+    "tests",
+    ".github"
 ]
 
 line-length = 100

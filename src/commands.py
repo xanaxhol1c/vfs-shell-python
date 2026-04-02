@@ -12,6 +12,7 @@ from src.models import INode, Directory, File
 from src.context import VFSContext
 from src.types import CommandResult
 from src.exceptions import VFSFileSystemException, VFSValidationException
+from src.factory import FileFactory
 
 # Help functions for path resolution
 
@@ -97,6 +98,9 @@ class MkdirCommand(ICommand):
         self.path = path
 
     def execute(self, context: VFSContext) -> None:
+        if not context.is_initialized():
+            raise VFSFileSystemException("mkdir: Filespace was not initialized.")
+
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
             raise VFSFileSystemException(
@@ -114,14 +118,27 @@ class TouchCommand(ICommand):
 
     def execute(self, context: VFSContext) -> None:
         # MVP quota check before write
-        if context.is_initialized() and not context.has_enough_space(len(self.content)):
+        if not context.is_initialized():
+            raise VFSFileSystemException("touch: Filespace was not initialized.")
+        if not context.has_enough_space(len(self.content)):
             raise VFSFileSystemException("touch: No free space on device (Quota Exceeded)")
-
         parent, name = get_parent_and_name(context, self.path)
         if not parent:
             raise VFSFileSystemException(f"touch: cannot create '{self.path}': No such directory")
 
-        new_file = File(name=name, content=self.content)
+        # Use FileFactory to create file with decorators (encrypted/compressed)
+        # based on configuration (if config_manager is available)
+        if context.config_manager:
+            new_file = FileFactory.create_file(
+                name=name,
+                parent_path=parent.get_path(),
+                config_manager=context.config_manager,
+                content=self.content,
+            )
+        else:
+            # Fallback to plain File if no config
+            new_file = File(name=name, content=self.content)
+
         parent.add_child(new_file)
 
 
@@ -186,6 +203,10 @@ class CatCommand(ICommand):
         if isinstance(node, Directory):
             raise VFSFileSystemException(f"cat: {self.path}: Is a directory")
 
+        # Use .read() method to support decorated files (encrypted/compressed)
+        # This enables transparent decryption/decompression
+        if hasattr(node, "read"):
+            return node.read()
         return node.content
 
 
@@ -196,6 +217,49 @@ class ClsCommand(ICommand):
         # 'cls' for Windows, 'clear' for POSIX (Linux/Mac)
         os.system("cls" if os.name == "nt" else "clear")
         return True
+
+
+class RevealCommand(ICommand):
+    """
+    Debug command: Shows the raw internal content of a file.
+    Use this to prove files are encrypted/compressed internally.
+
+    Usage: reveal <path>
+
+    Examples:
+      reveal /secret/file.txt   → Shows Base64-encoded content if encrypted
+      reveal /archive/log.txt   → Shows normalized/compressed content
+      reveal /regular/file.txt  → Shows plaintext (if not decorated)
+    """
+
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+    def execute(self, context: VFSContext) -> str:
+        node = get_node_by_path(context, self.path)
+
+        if not node:
+            raise VFSFileSystemException(f"reveal: {self.path}: No such file or directory")
+        if isinstance(node, Directory):
+            raise VFSFileSystemException(f"reveal: {self.path}: Is a directory")
+
+        # Access the underlying wrapped file to see raw content
+        # For decorated files, this shows encrypted/compressed data
+        # For plain files, this shows normal content
+        if hasattr(node, "_wrapped"):
+            # This is a decorator - get the innermost wrapped file
+            current = node
+            while hasattr(current, "_wrapped"):
+                current = current._wrapped
+            # Now current should be the plain File object
+            if hasattr(current, "content"):
+                return f"[INTERNAL STORAGE]\n{current.content}"
+
+        # Plain file or no wrapping
+        if hasattr(node, "content"):
+            return f"[PLAINTEXT]\n{node.content}"
+
+        return "[ERROR] Cannot access file content"
 
 
 class ExitCommand(ICommand):

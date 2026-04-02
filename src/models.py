@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional
 from src.exceptions import VFSFileSystemException, VFSValidationException
 
+
 class INode(ABC):
     """
     Abstract base class for all file system elements.
@@ -37,7 +38,17 @@ class INode(ABC):
         return f"{parent_path}/{self.name}"
 
 
-class File(INode):
+class IVirtualFile(INode, ABC):
+    @abstractmethod
+    def read(self) -> str:
+        pass
+
+    @abstractmethod
+    def write(self, data: str) -> None:
+        pass
+
+
+class File(IVirtualFile):
     """
     A class representing a text file in VFS.
     """
@@ -52,6 +63,12 @@ class File(INode):
         # Files have default permissions of 644 (rw-r--r--)
         super().__init__(name, parent, permissions)
         self.content: str = content
+
+    def read(self) -> str:
+        return self.content
+
+    def write(self, data: str) -> None:
+        self.content = data
 
     def get_size(self) -> int:
         """
@@ -80,14 +97,13 @@ class Directory(INode):
         """
         return sum(child.get_size() for child in self.children.values())
 
-    def add_child(self, node: INode) -> None:   
+    def add_child(self, node: INode) -> None:
         """Adds new node to directory with name and character validation."""
         # check for invalid characters
         forbidden_chars = ["?", "*", "\\"]
         if any(char in node.name for char in forbidden_chars):
             raise VFSValidationException(
-                f"Invalid characters in name '{node.name}'. "
-                f"Symbols ?, *, \\ are forbidden."
+                f"Invalid characters in name '{node.name}'. Symbols ?, *, \\ are forbidden."
             )
 
         # check for name conflicts
@@ -95,7 +111,7 @@ class Directory(INode):
             raise VFSFileSystemException(
                 f"Element with name '{node.name}' already exists in this directory."
             )
-        
+
         self.children[node.name] = node
         node.parent = self
 
