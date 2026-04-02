@@ -219,6 +219,49 @@ class ClsCommand(ICommand):
         return True
 
 
+class RevealCommand(ICommand):
+    """
+    Debug command: Shows the raw internal content of a file.
+    Use this to prove files are encrypted/compressed internally.
+
+    Usage: reveal <path>
+
+    Examples:
+      reveal /secret/file.txt   → Shows Base64-encoded content if encrypted
+      reveal /archive/log.txt   → Shows normalized/compressed content
+      reveal /regular/file.txt  → Shows plaintext (if not decorated)
+    """
+
+    def __init__(self, path: str) -> None:
+        self.path = path
+
+    def execute(self, context: VFSContext) -> str:
+        node = get_node_by_path(context, self.path)
+
+        if not node:
+            raise VFSFileSystemException(f"reveal: {self.path}: No such file or directory")
+        if isinstance(node, Directory):
+            raise VFSFileSystemException(f"reveal: {self.path}: Is a directory")
+
+        # Access the underlying wrapped file to see raw content
+        # For decorated files, this shows encrypted/compressed data
+        # For plain files, this shows normal content
+        if hasattr(node, '_wrapped'):
+            # This is a decorator - get the innermost wrapped file
+            current = node
+            while hasattr(current, '_wrapped'):
+                current = current._wrapped
+            # Now current should be the plain File object
+            if hasattr(current, 'content'):
+                return f"[INTERNAL STORAGE]\n{current.content}"
+
+        # Plain file or no wrapping
+        if hasattr(node, 'content'):
+            return f"[PLAINTEXT]\n{node.content}"
+
+        return "[ERROR] Cannot access file content"
+
+
 class ExitCommand(ICommand):
     """Program exit."""
 

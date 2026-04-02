@@ -15,6 +15,7 @@ from src.commands import (
     ChmodCommand,
     LsCommand,
     CatCommand,
+    RevealCommand,
     ClsCommand,
     ExitCommand,
 )
@@ -60,6 +61,7 @@ class InputParser:
             "chmod": lambda a: ChmodCommand(permissions=int(a[0], 8), path=a[1]),
             "ls": lambda a: LsCommand(path=a[0] if a else ""),
             "cat": lambda a: CatCommand(path=a[0]),
+            "reveal": lambda a: RevealCommand(path=a[0]),
             "cls": lambda _: ClsCommand(),
             "clear": lambda _: ClsCommand(),
             "exit": lambda _: ExitCommand(),
