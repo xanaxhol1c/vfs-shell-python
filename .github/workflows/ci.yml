@@ -22,7 +22,7 @@ jobs:
 
       # Step 3: Cache Poetry dependencies
       - name: Cache Poetry installation
-        uses: actions/cache@v3
+        uses: actions/cache@4
         with:
           path: ~/.local
           key: poetry-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
@@ -41,7 +41,7 @@ jobs:
 
       # Step 6: Cache virtual environment
       - name: Cache venv
-        uses: actions/cache@v3
+        uses: actions/cache@4
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ hashFiles('**/pyproject.toml') }}
@@ -73,7 +73,7 @@ jobs:
       # Step 11: Upload coverage to artifacts (optional)
       - name: Upload coverage reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: htmlcov/
