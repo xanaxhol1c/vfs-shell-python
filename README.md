@@ -39,6 +39,52 @@ The project is designed to demonstrate key software construction principles, inc
     poetry run ruff check .
     ```
 
+4. **Run Tests:**
+    Execute the test suite with pytest:
+    ```
+    poetry run pytest tests/ -v
+    ```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+This project includes an automated **GitHub Actions CI/CD pipeline** that runs on every push to `main` and on Pull Requests. The pipeline ensures code quality and reliability by running:
+
+**Pipeline Triggers:**
+- ✅ Every push to the `main` branch
+- ✅ Every Pull Request to `main`
+
+**Pipeline Steps:**
+1. **Environment Setup** - Configures Python 3.11 runtime
+2. **Dependency Installation** - Uses Poetry to install all dependencies
+3. **Linting** - Runs Ruff to check PEP8 compliance and code quality
+4. **Unit Tests** - Executes pytest with verbose output
+5. **Coverage Report** - Generates and uploads HTML coverage reports
+
+**Build Status:**
+- ❌ **Build fails** if:
+  - Any linting errors are detected (Ruff)
+  - Any test fails
+  - Dependencies fail to install
+
+- ✅ **Build passes** only when all checks succeed
+
+**View Pipeline:**
+- Go to the **Actions** tab in your GitHub repository
+- Click on any workflow run to see detailed logs and status
+
+**Coverage Reports:**
+- After each pipeline run, coverage reports are generated
+- Download from the workflow run artifacts as `coverage-report.zip`
+- Extract and open `htmlcov/index.html` in a browser to view detailed coverage
+
+**Workflow File:** `.github/workflows/ci.yml`
+
+---
+
 ## 🚀 How to Run
 
 ### Interactive Mode
