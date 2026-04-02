@@ -37,8 +37,18 @@ class INode(ABC):
             return f"/{self.name}"
         return f"{parent_path}/{self.name}"
 
+class IVirtualFile(INode, ABC):
+    @abstractmethod
+    def read(self) -> str:
+        pass
 
-class File(INode):
+    @abstractmethod
+    def write(self, data: str) -> None:
+        pass
+
+
+
+class File(IVirtualFile):
     """
     A class representing a text file in VFS.
     """
@@ -53,6 +63,12 @@ class File(INode):
         # Files have default permissions of 644 (rw-r--r--)
         super().__init__(name, parent, permissions)
         self.content: str = content
+
+    def read(self) -> str:
+        return self.content
+
+    def write(self, data: str) -> None:
+        self.content = data
 
     def get_size(self) -> int:
         """
