@@ -36,6 +36,7 @@ exclude = [
     ".env.*",
     "docs",
     "tests",
+    ".github"
 ]
 
 line-length = 100
