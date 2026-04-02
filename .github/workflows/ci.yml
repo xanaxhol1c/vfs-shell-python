@@ -67,7 +67,7 @@ jobs:
       # Step 10: Run tests with coverage report
       - name: Generate coverage report
         run: |
-          $HOME/.local/bin/poetry run pytest tests/ --cov=src --cov-report=term-with-missing --cov-report=html
+          $HOME/.local/bin/poetry run pytest tests/ --cov=src --cov-report=term-missing --cov-report=html
         continue-on-error: true
 
       # Step 11: Upload coverage to artifacts (optional)
